@@ -1,11 +1,11 @@
 import urllib.request
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from typing import Union
 
-URL_EXTENSIONS = {"robots.txt": "/robots.txt"}
+URL_EXTENSIONS = {"robots": "/robots.txt", "sitemap": "/sitemap.xml"}
 
-
-def retrieveWebContent(url: str, encoding: str = 'utf8', extension: str = '') -> Union[None, str]:
+def retrieveWebContent(url: str, extension: str = '', encoding: str = 'utf8',
+                       useAgent: bool = True) -> Union[None, str]:
     """ Load the html content of a website.
 
     This function sends a request to a server using the given url with the given extension.
@@ -13,6 +13,8 @@ def retrieveWebContent(url: str, encoding: str = 'utf8', extension: str = '') ->
     cause the return type to be None. Otherwise, the return value will be the content of the
     page.
 
+    :param useAgent:  A boolean value of true to use an agent. This can be helpful in
+                      cases were a permission error is raised. The agent used is Mozilla 5.0.
     :param extension: An extension string value appended to the url. This is used
                       to retrieve multiple pages quickly into a website. The default
                       value of the extension is an empty string.
@@ -21,13 +23,18 @@ def retrieveWebContent(url: str, encoding: str = 'utf8', extension: str = '') ->
     :return:          The content of the website as a string.
     """
     try:
-        handle = urllib.request.urlopen(url + extension)
+        agent_headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'} if useAgent else {}
+        http_request = urllib.request.Request(url + extension, headers=agent_headers)
+        handle = urllib.request.urlopen(http_request)
         content = handle.read()
         handle.close()
+        return content.decode(encoding)
     except HTTPError as err:
         print(f'[Error no.{err.code}] Could not read the content of the following url: {url}')
         return None
-    return content.decode(encoding)
+    except URLError as err:
+        print(f'[Error no.{err.errno}] The following URL cannot be found: {url}')
+        return None
 
 
 def retrieveUrlBase(url: str) -> Union[None, str]:
