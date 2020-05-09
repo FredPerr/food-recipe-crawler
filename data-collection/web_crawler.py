@@ -5,15 +5,23 @@ from typing import Union
 URL_EXTENSIONS = {"robots.txt": "/robots.txt"}
 
 
-def retrieveWebContent(url: str, encoding: str = 'utf8') -> Union[None, str]:
+def retrieveWebContent(url: str, encoding: str = 'utf8', extension: str = '') -> Union[None, str]:
     """ Load the html content of a website.
 
-    :param url: The url of the website's page.
-    :param encoding: The encoding to use for the decoding part. Default is UTF-8.
-    :return: The content of the website as a string.
+    This function sends a request to a server using the given url with the given extension.
+    The distant server can raise an error which will be handled in that function. This will
+    cause the return type to be None. Otherwise, the return value will be the content of the
+    page.
+
+    :param extension: An extension string value appended to the url. This is used
+                      to retrieve multiple pages quickly into a website. The default
+                      value of the extension is an empty string.
+    :param url:       The url of the website's page.
+    :param encoding:  The encoding to use for the decoding part. Default is UTF-8.
+    :return:          The content of the website as a string.
     """
     try:
-        handle = urllib.request.urlopen(url)
+        handle = urllib.request.urlopen(url + extension)
         content = handle.read()
         handle.close()
     except HTTPError as err:
@@ -39,15 +47,3 @@ def retrieveUrlBase(url: str) -> Union[None, str]:
     if urlBaseLastIndex == 0:
         return None
     return url[:urlBaseLastIndex]
-
-
-def retrieveUrlContent(url: str, extension: str) -> Union[None, str]:
-    urlBase = retrieveUrlBase(url)
-
-    # Searching for the robots.txt file
-    urlTarget = urlBase + '/robots.txt'
-
-    return retrieveWebContent(urlTarget)
-
-
-print(retrieveRobotTxtFileContent("https://developer.mozilla.org/robots.txt"))
