@@ -1,6 +1,8 @@
 from typing import Union
 import json
 
+from log_system import error
+
 
 def arrayToString(var: Union[list, tuple], separator: str = '') -> str:
     """ Convert an array (list or tuple) to a string value (str).
@@ -52,7 +54,7 @@ def retrieveFileContent(file: str, array_return: bool = False) -> Union[None, st
             f.close()
         return fileContent if not array_return else fileContent.split('\n')
     except OSError as err:
-        print(f'[Error no.{err.errno}] Could not load the following file: {file}')
+        error(f'Could not load the following file: {file}', err.errno)
         return None
 
 
