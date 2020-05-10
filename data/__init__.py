@@ -1,6 +1,7 @@
 """
 This package manages the collection of data on the web
 and the export of this same data in a certain format.
-"""
 
-from data import web_crawler as crawler
+Function used for the collection of data should be
+created under here in this module.
+"""

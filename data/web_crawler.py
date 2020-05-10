@@ -51,7 +51,7 @@ def retrieveUrlBase(url: str) -> Union[None, str]:
     """ Get the base url of an url which represent the root of the url "path".
 
     :param url: The url to get the base path from.
-    :return: The base of the url or None if the url was not valid.
+    :return:    The base of the url or None if the url was not valid.
     """
 
     if not url.endswith('/'):
@@ -81,8 +81,10 @@ def find_sitemaps_url(url: str) -> Union[list, None]:
     a sitemap was found and that it represents a list of sitemaps,
     only the first sitemap will be listed.
 
-    :param url: The url to search the sitemaps into. It is possible to add an url that have been extended.
-    :return: The list of the found sitemaps or None if an error was raised or None was found.
+    :param url: The url to search the sitemaps into. It is possible
+                to add an url that have been extended.
+    :return:    The list of the found sitemaps or None if an error was
+                raised or None was found.
     """
     urls = []
 
@@ -118,7 +120,7 @@ def find_sitemaps_url(url: str) -> Union[list, None]:
 
         for i in range(len(lines)):
             if lines[i].startswith('Sitemap'):
-                urls.append(lines[i].split(': ')[1].replace(' ', ''))
+                urls.append(lines[i].split(':', 1)[1].replace(' ', ''))
 
         # No sitemap has been found for this website.
         if len(urls) == 0:
