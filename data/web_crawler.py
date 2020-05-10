@@ -72,9 +72,18 @@ def retrieveUrlBase(url: str) -> Union[None, str]:
 
 
 def find_sitemaps_url(url: str) -> Union[list, None]:
-    # Try usual case like url/sitemap.xml
-    # search in the robots.txt file
+    """Search for the url(s) of the sitemap(s) of a website.
 
+    First, this function searches using the a common url used for
+    the sitemap which is 'www.website.com/sitemap.xml'. If did not
+    work, it tries to search in the robots.txt file of the website.
+    The search is done with a depth value of 1. This means that if
+    a sitemap was found and that it represents a list of sitemaps,
+    only the first sitemap will be listed.
+
+    :param url: The url to search the sitemaps into. It is possible to add an url that have been extended.
+    :return: The list of the found sitemaps or None if an error was raised or None was found.
+    """
     urls = []
 
     urlBase = retrieveUrlBase(url)
