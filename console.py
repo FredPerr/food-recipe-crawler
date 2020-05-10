@@ -1,105 +1,88 @@
-import os
-import platform
-from typing import Union
+"""
 
-from log_system import out
-from data import web_crawler as crawler
+Log system:
+
+    variables:
+        last_raw_output: the last output value not serialized.
+
+    methods / functions:
+
+        set_output_level(level: int) -> Set the level of the outputs.
+            If the level of an output is inferior of the actual level,
+            it will not be logged but will be set as the new last_raw_output
+
+        out(object: *, prefix: str = '', level: int) -> Outputs an object
+            that will be serialized, set the last_raw_output variable
+            and add the tag to the output.
+
+        info(object: *) -> out(object, '[INFO] ', 1)
+        warn(object: *) -> out(object, '[WARN]', 2)
+        error(object: *, code: Union[str, int, None] = None) -> out(object, '[ERROR{code}]', 3)
+
+Console system:
+
+
+"""
+from typing import Tuple, List, Union
+
 from data import data_saver
-
-
-def clear():
-    if 'Windows' in platform.system():
-        os.system('cls')
-    else:
-        os.system('clear')
 
 
 class Console:
 
-    def __init__(self):
-        clear()
-        self.last_output = ''
-        self.commands = (
-            ('', self.run_help, ''),
-            ('help', self.run_help, 'Run the help command'),
-            ('quit', self.run_quit, 'Quit the program.'),
-            ('sitemap', self.run_sitemap, 'Find the sitemap(s) of a website.'),
-            ('export', self.export, 'Export content in an external file.')
-        )
+    def __init__(self, commands: List[Tuple[str, str, str]]):
+        self.commands = commands
+        self.last_raw_output = None
+        self.log_level = 3
 
-        self.output(f"""
-            QuickRecipeAPI - Main menu
+    def output(self, obj, prefix: str = '', level: int = 0):
+        """Prints a value in the console.
 
-            What would you like to do ?
+        The last raw input is set to the given object. The given object
+        to output is formatted if it is not a string. Then, it prints the
+        tag followed by the object serialized value.
+        :param level:   The level of the output importance. The more the output is
+                        high, the less it is important.
+        :param obj:     The object to send to the console.
+        :param prefix:  The prefix of the message. This can be expressed as a 'tag'.
+        """
+        self.last_raw_output = obj
+        serialized = obj
 
-            """)
-
-        self.run_help()
-
-        user_input = ''
-        while user_input != 'quit':
-            user_input = input(':')
-            cmd = self.get_command(user_input)
-            if cmd is not None:
-                args = user_input.split(" ")
-
-                if len(args) != 0:
-                    args = args[1:]
-
-                values = {}
-                for i in range(len(args)):
-                    split = args[i].split('=', 1)
-                    if len(split) == 2 and len(split[0]) != 0 and len(split[1]) != 0:
-                        values.update({split[0]: split[1]})
-
-                clear()
-                cmd[1](**values)
-
-        self.run_quit()
-
-    def export(self, output: str = None, file: str = './export.txt'):
-
-        if output is None:
-            output = self.last_output
-
-        data_saver.writeInFile(file, output, True)
-
-    def output(self, message):
-        self.last_output = message
-        out(message)
-
-    def run_quit(self, **kwargs):
-        self.output('Quiting the program !')
-        quit(0)
-
-    def run_help(self, **kwargs):
-        self.output('Available commands:\n')
-
-        for i in range(1, len(self.commands)):
-            self.output(self.commands[i][0] + ': ' + self.commands[i][2])
-
-        print()
-
-    def run_sitemap(self, **kwargs):
-        if 'url' not in kwargs.keys():
-            self.output('You must specify the url of the website')
+        if level > self.log_level:
             return
 
-        self.output(crawler.find_sitemaps_url(kwargs.get('url')))
+        if not isinstance(obj, str):
+            serialized = data_saver.serialize(obj)
+        print(prefix + serialized)
 
-    def get_command(self, cmd_name: str) -> Union[tuple, None]:
-        """Get a command's attributes.
+    def info(self, obj):
+        self.output(obj, '[INFO] ', 3)
 
-        :param cmd_name: The command to search for.
-        :return:         A tuple if the command was
-                         found or None if it has not
-                         been found.
+    def warn(self, obj):
+        self.output(obj, '[WARN] ', 2)
+
+    def error(self, obj, code: Union[str, int, None] = None):
+        if isinstance(code, int):
+            code = str(code)
+        self.output(obj, f'[ERROR{"" if code is None else " NO." + code}] ', 1)
+
+    def set_log_level(self, level: int):
+        """Set the current level of the logger.
+
+        Printing a message with a level superior to the level
+        of console's level, the message will not be printed.
+        :param level: The level to give to the console.
         """
-        for j in range(len(self.commands)):
-            if cmd_name.split(' ', 1)[0] in self.commands[j]:
-                return self.commands[j]
-        return None
+        self.log_level = level
 
+
+# Command pattern -> name, description, usage.
+COMMANDS = [
+    ('help', 'Send a help message', 'help'),
+    ('quit', 'Quit the program', 'quit'),
+    ('load', 'Load the content of a file in memory.', '')
+]
 
 if __name__ == '__main__':
-    c = Console()
+    c = Console(COMMANDS)
