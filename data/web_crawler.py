@@ -4,8 +4,6 @@ from typing import Union
 
 from bs4 import BeautifulSoup
 
-from log_system import error, warn, info
-
 URL_EXTENSIONS = {"robots": "/robots.txt", "sitemap": "/sitemap.xml"}
 
 
@@ -40,10 +38,10 @@ def retrieveWebContent(url: str, extension: str = '', encoding: str = 'utf8',
         handle.close()
         return content.decode(encoding)
     except HTTPError as err:
-        error(f'Could not read the content of the following url: {combined_url}', err.code)
+        print(f'Could not read the content of the following url: {combined_url}', err.code)
         return None
     except URLError as err:
-        error(f'The following URL could not be found: {combined_url}', err.errno)
+        print(f'The following URL could not be found: {combined_url}', err.errno)
         return None
 
 
@@ -66,7 +64,7 @@ def retrieveUrlBase(url: str) -> Union[None, str]:
                 urlBaseLastIndex = i
                 break
     if urlBaseLastIndex == 0:
-        warn(f'Could not find the following URL: {url}')
+        print(f'Could not find the following URL: {url}')
         return None
     return url[:urlBaseLastIndex]
 
@@ -105,13 +103,13 @@ def find_sitemaps_url(url: str) -> Union[list, None]:
             urls[i] = str(urls[i])[len(tag) + 2: -len(tag) - 3]
     # The robots file was found.
     else:
-        info('Searching into robots.txt file')
+        print('Searching into robots.txt file')
         # Search into the sitemap if present. if the content of the sitemap does not refer to other sitemaps, return
         # the first sitemap.
         robotContent = retrieveWebContent(urlBase, URL_EXTENSIONS.get('robots'))
 
         if robotContent is None:
-            warn('robots.txt file could not be retrieved.')
+            print('robots.txt file could not be retrieved.')
             return None
 
         lines = robotContent.split('\n')
@@ -124,7 +122,7 @@ def find_sitemaps_url(url: str) -> Union[list, None]:
 
         # No sitemap has been found for this website.
         if len(urls) == 0:
-            warn(f'No sitemap has been found for the following website: {url}')
+            print(f'No sitemap has been found for the following website: {url}')
             return None
 
         # Test the sitemap links to see if they are sitemap links themselves.
