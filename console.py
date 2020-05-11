@@ -288,7 +288,7 @@ def cmd_sitemap(exportFile: str, urls: str):
     console.info(f'Sitemap list exported into the file {exportFile}')
 
 
-#sitemap ./test.txt ./urls.txt
+# sitemap ./test.txt ./urls.txt
 
 if __name__ == '__main__':
 
@@ -298,3 +298,13 @@ if __name__ == '__main__':
     console = Console(COMMANDS)
     while True:
         console.input()
+
+
+"""
+TODO: 
+
+Merge web_crawler with data_saver and console.
+
+Make a unique console all the module so that they use the same instance.
+
+"""
