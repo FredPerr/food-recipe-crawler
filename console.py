@@ -221,8 +221,8 @@ def cmd_clear():
         os.system('clear')
 
 
-def cmd_load(path: str, arrayType: str = 'false'):
-    content = data_saver.retrieveFileContent(path, True if arrayType == 'true' else False)
+def cmd_load(path: str, array_type: str = 'false'):
+    content = data_saver.retrieveFileContent(path, True if array_type == 'true' else False)
 
     if content is None:
         console.error(f'Could not load the following file: {path}')
@@ -233,11 +233,11 @@ def cmd_load(path: str, arrayType: str = 'false'):
     console.info(f'The content of the file has been copied in the clipboard. ({size} characters)')
 
 
-def cmd_export(path: str, append: str = 'true', lineSep: str = '\n'):
+def cmd_export(path: str, append: str = 'true', line_sep: str = '\n'):
     if console.clipboard is None:
         console.error('Could not export the content of the clipboard because it is empty.')
         return
-    data_saver.writeInFile(path, console.clipboard, True if append == 'true' else False, lineSep)
+    data_saver.writeInFile(path, console.clipboard, True if append == 'true' else False, line_sep)
     console.info(f'Pasted the content of the clipboard into the following file: {path}')
 
 
