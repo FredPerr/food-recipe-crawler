@@ -1,5 +1,7 @@
 from enum import Enum
 from typing import List, Tuple
+import os
+import platform
 
 
 class LogLevel(Enum):
@@ -23,6 +25,8 @@ class Snake:
     """
 
     def __init__(self):
+        self._clear_cmd = 'cls' if 'Windows' in platform.platform() else 'clear'
+
         self._actions = List[Tuple[str, callable]]
 
         # The level of logging accepted by the snake.
@@ -77,6 +81,13 @@ class Snake:
                          see #LogLevel class for more information.
         """
         pass
+
+    def clean(self):
+        """Clean all the outputs of the snake and inputs.
+
+        Clears the console's so that there are no more text on screen.
+        """
+        os.system(self._clear_cmd)
 
     def ask(self, question: str = '') -> str:
         """Make the snake ask a question to the user.
