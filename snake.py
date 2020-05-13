@@ -263,113 +263,115 @@ class Snake:
         """
         os.system(self._clear_cmd)
 
+    def _process_command_input(self, command: str) \
+            -> Union[Tuple[str, Union[List[str], None], Union[Dict[str, str], None]], None]:
+        """Process an input command to parse it.
 
-def process_command_input(command: str) \
-        -> Union[Tuple[str, Union[List[str], None], Union[Dict[str, str], None]], None]:
-    """Process an input command to parse it.
+        First, it checks if the command input is valid. For that, the argument #command must not be
+        None, be a string and have a length of 1 or more.
+        Secondly, it checks if the command have arguments or not. If it is not the case, it returns
+        the command with no argument. Otherwise, it follow on with the parsing of the command.
+        Thirdly, it splits the command taking in account the arguments surrounded by double quotes
+        ('"'). This step removes unnecessary whitespaces that are outside the double quotes and between
+        the arguments and the command name.
+        After that, it checks if the type of the type of the argument are positional or key-value type.
+        Then, it splits the key-value arguments if the type of the arguments is key-value. The split
+        is done using the first equal ('=') character.
+        name.
+        Finally, it creates a new tuple for the positional values or a dictionary for the key-values
+        arguments.
 
-    First, it checks if the command input is valid. For that, the argument #command must not be
-    None, be a string and have a length of 1 or more.
-    Secondly, it checks if the command have arguments or not. If it is not the case, it returns
-    the command with no argument. Otherwise, it follow on with the parsing of the command.
-    Thirdly, it splits the command taking in account the arguments surrounded by double quotes
-    ('"'). This step removes unnecessary whitespaces that are outside the double quotes and between
-    the arguments and the command name.
-    After that, it checks if the type of the type of the argument are positional or key-value type.
-    Then, it splits the key-value arguments if the type of the arguments is key-value. The split
-    is done using the first equal ('=') character.
-    name.
-    Finally, it creates a new tuple for the positional values or a dictionary for the key-values
-    arguments.
+        Unhandled pattern: If the value is an odd amount of double quotes, it causes
+        the value to connect with the next argument.
 
-    :param command: The command to parse. The form of the command should follow this pattern:
-                    '<action> <argument1> <"argument2"> <...>' or '<action> <-argument_name="value">
-                    <-argument_name2="value2">'. NB that the double quotes are used to keep
-                    whitespace split disable inside them. They will not affect the value. The hyphen
-                    at the beginning of the key-value arguments are mandatory in order to take them
-                    in account as a key-value type. Positional type will be used otherwise. Those
-                    quotes must be placed at the beginning and at the end of the value.
-    :return:        A tuple with the command name in the first index and the key-value ('**kwargs')
-                    dictionary or the values ('*values') tuple in the second index. If the command
-                    has no argument, the second index value will be None. If the command is empty or
-                    equal to None, it will return None.
-    """
+        :param command: The command to parse. The form of the command should follow this pattern:
+                        '<action> <argument1> <"argument2"> <...>' or '<action> <-argument_name="value">
+                        <-argument_name2="value2">'. NB that the double quotes are used to keep
+                        whitespace split disable inside them. They will not affect the value. The hyphen
+                        at the beginning of the key-value arguments are mandatory in order to take them
+                        in account as a key-value type. Positional type will be used otherwise. Those
+                        quotes must be placed at the beginning and at the end of the value.
+        :return:        A tuple with the command name in the first index and the key-value ('**kwargs')
+                        dictionary or the values ('*values') tuple in the second index. If the command
+                        has no argument, the second index value will be None. If the command is empty or
+                        equal to None, it will return None.
+        """
 
-    # Check if the command is valid.
-    if command is None or not isinstance(command, str) or len(command.replace(' ', '')) == 0:
-        return None
+        # Check if the command is valid.
+        if command is None or not isinstance(command, str) or len(command.replace(' ', '')) == 0:
+            return None
 
-    # Split the command with whitespaces and return it if it does not have arguments.
-    split = command.split(' ')
-    command_name = split[0]
-    if len(split) == 1:
-        return command_name, None, None
+        # Split the command with whitespaces and return it if it does not have arguments.
+        split = command.split(' ')
+        command_name = split[0]
+        if len(split) == 1:
+            return command_name, None, None
 
-    args = []
+        args = []
 
-    # Getting the arguments separately.
-    in_quotes = False
-    i = len(command_name)
-    while i < len(command):
-        char = command[i]
-        if char == ' ' and not in_quotes:
-            i += 1
-            continue
+        # Getting the arguments separately.
+        in_quotes = False
+        i = len(command_name)
+        while i < len(command):
+            char = command[i]
+            if char == ' ' and not in_quotes:
+                i += 1
+                continue
 
-        j = 0
-        arg = []
-        while i + j < len(command) and (command[i + j] != ' ' or in_quotes):
-            if command[i + j] == '"':
-                if not in_quotes:
-                    in_quotes = True
-                else:
-                    in_quotes = False
-            arg.append(command[i + j])
-            j += 1
-        else:
-            i += j
-        i += 1
-        args.append(''.join(arg))
-
-    values = []
-    kwargs = {}
-
-    # TODO rewrite under here.
-
-    # Parsing the arguments.
-    for arg in args:
-        if arg[len(arg) - 1] == '"':
-            # Search for the other quotes.
-            second_quotes = arg.find('"')
-            if second_quotes != -1 and second_quotes != len(arg) - 1:
-                if len(arg[:second_quotes]) == 0:
-                    # value pattern
-                    if len(arg) == 2:  # "" case.
-                        values.append('')
+            j = 0
+            arg = []
+            while i + j < len(command) and (command[i + j] != ' ' or in_quotes):
+                if command[i + j] == '"':
+                    if not in_quotes:
+                        in_quotes = True
                     else:
-                        values.append(arg[1:-1])
-                elif '=' in arg[:second_quotes]:
-                    pass
-                    # key-value pattern
-                    kv = arg.split('=', 1)
-                    value = ''
-                    if len(kv[1]) > 2:
-                        value = kv[1][1:-1]
-                    kwargs.update({kv[0]: value})
-                else:
-                    # error can't handle that format.
-                    print('Could not handle this argument: ' + arg)
-        else:
-            equal_char = arg.find('=')
-            if equal_char != -1 and equal_char > 0:
-                key_name = arg[:equal_char]
-                if equal_char + 1 == len(arg):
-                    kwargs.update({key_name: ''})
-                else:
-                    kwargs.update({key_name: arg[equal_char + 1:]})
+                        in_quotes = False
+                arg.append(command[i + j])
+                j += 1
             else:
-                values.append(arg)
-    return command_name, values, kwargs
+                i += j
+            i += 1
+            args.append(''.join(arg))
+
+        values = []
+        kwargs = {}
+
+        # TODO rewrite under here.
+
+        # Parsing the arguments.
+        for arg in args:
+            if arg[len(arg) - 1] == '"':
+                # Search for the other quotes.
+                second_quotes = arg.find('"')
+                if second_quotes != -1 and second_quotes != len(arg) - 1:
+                    if len(arg[:second_quotes]) == 0:
+                        # value pattern
+                        if len(arg) == 2:  # "" case.
+                            values.append('')
+                        else:
+                            values.append(arg[1:-1])
+                    elif '=' in arg[:second_quotes]:
+                        pass
+                        # key-value pattern
+                        kv = arg.split('=', 1)
+                        value = ''
+                        if len(kv[1]) > 2:
+                            value = kv[1][1:-1]
+                        kwargs.update({kv[0]: value})
+                    else:
+                        # error can't handle that format.
+                        self.tell('Could not handle this argument: ' + arg, LogLevel.WARNING)
+            else:
+                equal_char = arg.find('=')
+                if equal_char != -1 and equal_char > 0:
+                    key_name = arg[:equal_char]
+                    if equal_char + 1 == len(arg):
+                        kwargs.update({key_name: ''})
+                    else:
+                        kwargs.update({key_name: arg[equal_char + 1:]})
+                else:
+                    values.append(arg)
+        return command_name, values, kwargs
 
 
 if __name__ == '__main__':
@@ -379,10 +381,3 @@ if __name__ == '__main__':
             'can perform or on a specific action by providing its name as the action argument.')
     s.perform('help ')
 
-    output = process_command_input('cmd a=" a "value 2" key=value3 key2="this is a value"')
-
-    # BUG: Single/Triple double quotes connecting with the other value
-
-    print(output[0])
-    print(output[1])
-    print(output[2])
