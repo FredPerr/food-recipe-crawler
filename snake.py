@@ -379,7 +379,10 @@ if __name__ == '__main__':
             'can perform or on a specific action by providing its name as the action argument.')
     s.perform('help ')
 
-    value = process_command_input('cmd  value "value 2" key=value3 key2="this is a value"')
-    print(value[0])
-    print(value[1])
-    print(value[2])
+    output = process_command_input('cmd a=" a "value 2" key=value3 key2="this is a value"')
+
+    # BUG: Single/Triple double quotes connecting with the other value
+
+    print(output[0])
+    print(output[1])
+    print(output[2])
