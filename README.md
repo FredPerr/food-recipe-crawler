@@ -1,1 +1,3 @@
 Scrape and normalize data of food recipes on the Web with crawlers automatically...
+
+Uses sitemaps of websites to fetch all their recipes, for each website, the HTML is parsed following preset rules.
