@@ -1,3 +1,3 @@
 Scrape and normalize data of food recipes on the Web with crawlers automatically...
 
-Uses sitemaps of websites to fetch all their recipes, for each website, the HTML is parsed following preset rules.
+Uses websites' sitemaps to fetch all their recipes and the HTML is parsed following preset rules for each one of them.
